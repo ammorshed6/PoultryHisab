@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>পোল্ট্রি হিসাব</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+:root {
+  --primary: #c17f24; --primary-light: #e09a2a; --primary-dark: #8a5a10;
+  --green: #1a6b3c; --danger: #e03c3c;
+  --bg: #fdf8f0; --card: #ffffff; --text: #2a1a08;
+  --text-muted: #7a5a30; --border: #e8d4b0;
+  --shadow: 0 4px 20px rgba(193,127,36,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:480px; margin:0 auto; padding-bottom:80px; }
+.app-header { background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,var(--primary-light) 100%); color:white; padding:14px 16px; position:sticky; top:0; z-index:100; box-shadow:0 3px 15px rgba(0,0,0,0.25); }
+.header-top { display:flex; justify-content:space-between; align-items:center; }
+.app-title { font-size:18px; font-weight:700; }
+.app-subtitle { font-size:11px; opacity:0.85; }
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:white; display:flex; border-top:2px solid var(--border); z-index:200; box-shadow:0 -4px 20px rgba(0,0,0,0.1); overflow-x:auto; }
+.nav-btn { flex:1; min-width:52px; padding:7px 2px 5px; text-align:center; cursor:pointer; border:none; background:none; color:var(--text-muted); font-family:'Hind Siliguri',sans-serif; font-size:9px; }
+.nav-btn.active { color:var(--primary); }
+.nav-btn .icon { font-size:19px; display:block; margin-bottom:1px; }
+.page { display:none; padding:12px; }
+.page.active { display:block; }
+.card { background:var(--card); border-radius:14px; padding:14px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:10px; }
+.section-title { font-size:14px; font-weight:700; color:var(--primary-dark); margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:6px; }
+.form-row { margin-bottom:10px; }
+.form-label { font-size:12px; color:var(--text-muted); margin-bottom:4px; display:block; font-weight:500; }
+.form-input, .form-select { width:100%; padding:10px 12px; border:2px solid var(--border); border-radius:10px; font-family:'Hind Siliguri',sans-serif; font-size:14px; color:var(--text); background:var(--bg); -webkit-appearance:none; }
+.form-input:focus, .form-select:focus { outline:none; border-color:var(--primary-light); background:white; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.btn { padding:11px 14px; border:none; border-radius:10px; font-family:'Hind Siliguri',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
+.btn-primary { background:linear-gradient(135deg,var(--primary-dark),var(--primary-light)); color:white; width:100%; box-shadow:0 4px 12px rgba(193,127,36,0.3); }
+.btn-primary:active { transform:scale(0.98); }
+.btn-sm { padding:5px 10px; font-size:12px; border-radius:8px; }
+.btn-edit { background:#e8f4ea; color:var(--green); border:1px solid #b8dfc0; }
+.btn-delete { background:#fde8e8; color:var(--danger); border:1px solid #f5b8b8; }
+.btn-outline { background:white; color:var(--primary); border:2px solid var(--primary); width:100%; }
+.btn-green { background:linear-gradient(135deg,#1a6b3c,#2d9e5f); color:white; width:100%; }
+.list-item { background:var(--card); border-radius:12px; padding:12px 13px; margin-bottom:8px; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.list-item-header { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.list-item-title { font-size:14px; font-weight:600; color:var(--text); }
+.list-item-sub { font-size:11px; color:var(--text-muted); margin-top:3px; }
+.item-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; white-space:nowrap; }
+.badge-active { background:#e6f7ee; color:#1a6b3c; }
+.badge-closed { background:#f0f0f0; color:#888; }
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.stat-card { background:var(--card); border-radius:12px; padding:12px 10px; box-shadow:var(--shadow); border:1px solid var(--border); text-align:center; }
+.stat-card.full { grid-column:1/-1; }
+.stat-label { font-size:10px; color:var(--text-muted); font-weight:500; }
+.stat-value { font-size:20px; font-weight:700; margin-top:3px; color:var(--primary-dark); }
+.stat-value.green { color:#1a6b3c; }
+.stat-value.red { color:var(--danger); }
+.shed-tabs { display:flex; gap:8px; margin-bottom:12px; }
+.shed-tab { flex:1; padding:9px; border:2px solid var(--border); border-radius:10px; background:white; font-family:'Hind Siliguri',sans-serif; font-size:13px; font-weight:600; cursor:pointer; text-align:center; }
+.shed-tab.active { background:var(--primary); color:white; border-color:var(--primary); }
+.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:var(--primary-dark); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:1000; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none; }
+.toast.show { opacity:1; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; display:flex; align-items:flex-end; justify-content:center; }
+.modal { background:white; border-radius:20px 20px 0 0; padding:18px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; }
+.modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--primary-dark); display:flex; justify-content:space-between; align-items:center; }
+.modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); }
+.confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; }
+.confirm-box { background:white; border-radius:20px; padding:22px 18px 18px; width:100%; max-width:300px; }
+.confirm-icon { font-size:36px; text-align:center; margin-bottom:8px; }
+.confirm-msg { font-size:14px; font-weight:600; color:var(--text); text-align:center; margin-bottom:18px; line-height:1.5; }
+.confirm-btns { display:flex; gap:8px; }
+.confirm-yes { flex:1; padding:11px; background:var(--danger); color:white; border:none; border-radius:10px; font-family:'Hind Siliguri',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+.confirm-no { flex:1; padding:11px; background:var(--bg); color:var(--text); border:2px solid var(--border); border-radius:10px; font-family:'Hind Siliguri',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+.empty { text-align:center; padding:30px 20px; color:var(--text-muted); }
+.empty .icon { font-size:38px; margin-bottom:8px; }
+.empty p { font-size:13px; }
+.about-card { background:linear-gradient(135deg,var(--primary-dark),var(--primary-light)); color:white; border-radius:16px; padding:18px; text-align:center; margin-bottom:10px; }
+.mini-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px; }
+.mini-box { text-align:center; background:var(--bg); border-radius:8px; padding:7px; }
+.mini-label { font-size:10px; color:var(--text-muted); }
+.mini-val { font-size:13px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-top">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="font-size:30px;">🐔</div>
+      <div>
+        <div class="app-title">পোল্ট্রি হিসাব</div>
+        <div class="app-subtitle">ব্রয়লার ফার্ম ব্যবস্থাপনা</div>
+      </div>
+    </div>
+    <div style="font-size:11px;opacity:0.85;text-align:right;" id="today-date"></div>
+  </div>
+</div>
+
+<!-- PAGE 1: DASHBOARD -->
+<div class="page active" id="page-dash">
+  <div class="stats-grid" id="dash-stats"></div>
+  <div class="section-title">🐔 সক্রিয় ব্যাচ</div>
+  <div id="dash-batches"></div>
+</div>
+
+<!-- PAGE 2: SHED & BATCH -->
+<div class="page" id="page-shed">
+  <div class="shed-tabs">
+    <button class="shed-tab active" onclick="selectShed(1,this)">🏠 শেড ১</button>
+    <button class="shed-tab" onclick="selectShed(2,this)">🏠 শেড ২</button>
+  </div>
+  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="openBatchModal()">➕ নতুন ব্যাচ যোগ করুন</button>
+  <div id="batch-list"></div>
+</div>
+
+<!-- PAGE 3: DAILY -->
+<div class="page" id="page-daily">
+  <div class="form-row">
+    <label class="form-label">ব্যাচ নির্বাচন করুন</label>
+    <select class="form-select" id="daily-batch-sel" onchange="loadDailyRecords()"></select>
+  </div>
+  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="openDailyModal()">➕ দৈনিক রেকর্ড যোগ করুন</button>
+  <div id="daily-list"></div>
+</div>
+
+<!-- PAGE 4: EXPENSE -->
+<div class="page" id="page-expense">
+  <div class="form-row">
+    <label class="form-label">ব্যাচ নির্বাচন করুন</label>
+    <select class="form-select" id="expense-batch-sel" onchange="loadExpenses()"></select>
+  </div>
+  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="openExpenseModal()">➕ নতুন খরচ যোগ করুন</button>
+  <div id="expense-list"></div>
+  <div id="expense-total"></div>
+</div>
+
+<!-- PAGE 5: EMPLOYEES -->
+<div class="page" id="page-emp">
+  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="openEmpModal()">➕ নতুন কর্মচারী যোগ করুন</button>
+  <div id="emp-list"></div>
+</div>
+
+<!-- PAGE 6: SALES -->
+<div class="page" id="page-sales">
+  <div class="form-row">
+    <label class="form-label">ব্যাচ নির্বাচন করুন</label>
+    <select class="form-select" id="sales-batch-sel" onchange="loadSales()"></select>
+  </div>
+  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="openSaleModal()">➕ নতুন বিক্রয় যোগ করুন</button>
+  <div id="sales-list"></div>
+</div>
+
+<!-- PAGE 7: REPORT -->
+<div class="page" id="page-report">
+  <div class="form-row">
+    <label class="form-label">ব্যাচ নির্বাচন করুন</label>
+    <select class="form-select" id="report-batch-sel" onchange="loadReport()"></select>
+  </div>
+  <div id="report-content"></div>
+</div>
+
+<!-- PAGE 8: DATA -->
+<div class="page" id="page-data">
+  <div class="about-card">
+    <div style="font-size:44px;margin-bottom:6px;">🐔</div>
+    <div style="font-size:20px;font-weight:700;">পোল্ট্রি হিসাব</div>
+    <div style="font-size:11px;opacity:0.85;margin-bottom:14px;">ব্রয়লার ফার্ম ব্যবস্থাপনা অ্যাপ</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:12px;">
+      <div style="font-size:13px;margin:4px 0;">🎁 <strong>উপহার প্রদানকারী:</strong> এ.এম. মোরশেদ</div>
+      <div style="font-size:13px;margin:4px 0;">💚 <strong>উপহার গ্রহীতা:</strong> জনাব মোঃ কাউছার</div>
+      <div style="font-size:11px;margin-top:8px;opacity:0.85;">ভালোবাসা ও শ্রদ্ধার সাথে উপহার দেওয়া হলো ❤️</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">💾 ডেটা ব্যাকআপ</div>
+    <button class="btn btn-primary" onclick="backupData()" style="margin-bottom:8px;">📤 ব্যাকআপ কপি করুন</button>
+    <button class="btn btn-outline" onclick="showRestoreArea()">📥 রিস্টোর করুন</button>
+    <div id="restore-area" style="display:none;margin-top:10px;">
+      <textarea class="form-input" id="restore-input" rows="4" placeholder="ব্যাকআপ কোড এখানে পেস্ট করুন..."></textarea>
+      <button class="btn btn-green" style="margin-top:8px;" onclick="restoreData()">✅ রিস্টোর করুন</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">⚠️ ডেটা মুছুন</div>
+    <button class="btn" style="background:#fde8e8;color:var(--danger);border:1px solid #f5b8b8;width:100%;" onclick="clearAllData()">🗑️ সব ডেটা মুছুন</button>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('dash',this)"><span class="icon">🏠</span>ড্যাশ</button>
+  <button class="nav-btn" onclick="showPage('shed',this)"><span class="icon">🐔</span>ব্যাচ</button>
+  <button class="nav-btn" onclick="showPage('daily',this)"><span class="icon">📅</span>দৈনিক</button>
+  <button class="nav-btn" onclick="showPage('expense',this)"><span class="icon">💸</span>খরচ</button>
+  <button class="nav-btn" onclick="showPage('emp',this)"><span class="icon">👷</span>কর্মী</button>
+  <button class="nav-btn" onclick="showPage('sales',this)"><span class="icon">🛒</span>বিক্রয়</button>
+  <button class="nav-btn" onclick="showPage('report',this)"><span class="icon">📊</span>রিপোর্ট</button>
+  <button class="nav-btn" onclick="showPage('data',this)"><span class="icon">💾</span>ডেটা</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- Confirm Modal -->
+<div class="confirm-overlay" id="confirm-modal" style="display:none;">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-msg" id="confirm-msg">নিশ্চিত করুন?</div>
+    <div class="confirm-btns">
+      <button class="confirm-yes" onclick="_confirmYes()">হ্যাঁ</button>
+      <button class="confirm-no" onclick="_confirmNo()">না</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Modal -->
+<div class="modal-overlay" id="batch-modal" style="display:none;" onclick="if(event.target===this)closeBatchModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="batch-modal-title">🐔 নতুন ব্যাচ</span><button class="modal-close" onclick="closeBatchModal()">✕</button></div>
+    <div class="form-row"><label class="form-label">ব্যাচের নাম</label><input type="text" class="form-input" id="batch-name" placeholder="যেমন: ব্যাচ-১, মে-২০২৬"></div>
+    <div class="form-row"><label class="form-label">শেড</label><select class="form-select" id="batch-shed"><option value="1">শেড ১</option><option value="2">শেড ২</option></select></div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">শুরুর তারিখ</label><input type="date" class="form-input" id="batch-date"></div>
+      <div class="form-row"><label class="form-label">বাচ্চার সংখ্যা</label><input type="number" class="form-input" id="batch-count" placeholder="৫০০"></div>
+    </div>
+    <div class="form-row"><label class="form-label">নোট (ঐচ্ছিক)</label><input type="text" class="form-input" id="batch-notes" placeholder="অতিরিক্ত তথ্য..."></div>
+    <button class="btn btn-primary" onclick="saveBatch()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<!-- Daily Modal -->
+<div class="modal-overlay" id="daily-modal" style="display:none;" onclick="if(event.target===this)closeDailyModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="daily-modal-title">📅 দৈনিক রেকর্ড</span><button class="modal-close" onclick="closeDailyModal()">✕</button></div>
+    <div class="form-row"><label class="form-label">তারিখ</label><input type="date" class="form-input" id="daily-date"></div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">খাবার (কেজি)</label><input type="number" class="form-input" id="daily-feed" placeholder="০" step="0.1"></div>
+      <div class="form-row"><label class="form-label">মৃত্যু (টি)</label><input type="number" class="form-input" id="daily-deaths" placeholder="০"></div>
+    </div>
+    <div class="form-row"><label class="form-label">ওষুধ/ভ্যাকসিন</label><input type="text" class="form-input" id="daily-medicine" placeholder="যেমন: রানিক্ষেত ভ্যাকসিন"></div>
+    <div class="form-row"><label class="form-label">নোট</label><input type="text" class="form-input" id="daily-notes" placeholder="ঐচ্ছিক..."></div>
+    <button class="btn btn-primary" onclick="saveDaily()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expense-modal" style="display:none;" onclick="if(event.target===this)closeExpenseModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="expense-modal-title">💸 নতুন খরচ</span><button class="modal-close" onclick="closeExpenseModal()">✕</button></div>
+    <div class="form-row"><label class="form-label">তারিখ</label><input type="date" class="form-input" id="expense-date"></div>
+    <div class="form-row"><label class="form-label">খাত</label>
+      <select class="form-select" id="expense-cat">
+        <option value="chick">🐣 বাচ্চা ক্রয়</option>
+        <option value="feed">🌾 খাদ্য/ফিড</option>
+        <option value="medicine">💊 ওষুধ ও ভ্যাকসিন</option>
+        <option value="electricity">💡 বিদ্যুৎ/জ্বালানি</option>
+        <option value="litter">🪵 লিটার/তুষ</option>
+        <option value="salary">👷 বেতন/মজুরি</option>
+        <option value="transport">🚛 পরিবহন</option>
+        <option value="other">📦 অন্যান্য</option>
+      </select>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">পরিমাণ (৳)</label><input type="number" class="form-input" id="expense-amount" placeholder="০"></div>
+      <div class="form-row"><label class="form-label">পরিমাণ/ইউনিট</label><input type="text" class="form-input" id="expense-qty" placeholder="যেমন: ৫০ কেজি"></div>
+    </div>
+    <div class="form-row"><label class="form-label">বিবরণ</label><input type="text" class="form-input" id="expense-desc" placeholder="বিস্তারিত..."></div>
+    <button class="btn btn-primary" onclick="saveExpense()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<!-- Employee Modal -->
+<div class="modal-overlay" id="emp-modal" style="display:none;" onclick="if(event.target===this)closeEmpModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="emp-modal-title">👷 কর্মচারী</span><button class="modal-close" onclick="closeEmpModal()">✕</button></div>
+    <div class="form-row"><label class="form-label">নাম</label><input type="text" class="form-input" id="emp-name" placeholder="কর্মচারীর নাম"></div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">মাসিক বেতন (৳)</label><input type="number" class="form-input" id="emp-salary" placeholder="০"></div>
+      <div class="form-row"><label class="form-label">মোবাইল</label><input type="tel" class="form-input" id="emp-phone" placeholder="০১XXXXXXXXX"></div>
+    </div>
+    <div class="form-row"><label class="form-label">যোগদানের তারিখ</label><input type="date" class="form-input" id="emp-join"></div>
+    <button class="btn btn-primary" onclick="saveEmployee()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<!-- Advance Modal -->
+<div class="modal-overlay" id="advance-modal" style="display:none;" onclick="if(event.target===this)closeAdvanceModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="advance-modal-title">💰 অগ্রীম</span><button class="modal-close" onclick="closeAdvanceModal()">✕</button></div>
+    <input type="hidden" id="advance-emp-id">
+    <div class="form-row"><label class="form-label">তারিখ</label><input type="date" class="form-input" id="advance-date"></div>
+    <div class="form-row"><label class="form-label">পরিমাণ (৳)</label><input type="number" class="form-input" id="advance-amount" placeholder="০"></div>
+    <div class="form-row"><label class="form-label">কারণ (ঐচ্ছিক)</label><input type="text" class="form-input" id="advance-notes" placeholder="কারণ লিখুন..."></div>
+    <button class="btn btn-primary" onclick="saveAdvance()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<!-- Sale Modal -->
+<div class="modal-overlay" id="sale-modal" style="display:none;" onclick="if(event.target===this)closeSaleModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="sale-modal-title">🛒 বিক্রয়</span><button class="modal-close" onclick="closeSaleModal()">✕</button></div>
+    <div class="form-row"><label class="form-label">তারিখ</label><input type="date" class="form-input" id="sale-date"></div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">মুরগির সংখ্যা</label><input type="number" class="form-input" id="sale-count" placeholder="০" oninput="calcSaleTotal()"></div>
+      <div class="form-row"><label class="form-label">মোট ওজন (কেজি)</label><input type="number" class="form-input" id="sale-weight" placeholder="০.০" step="0.1" oninput="calcSaleTotal()"></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row"><label class="form-label">দাম (৳/কেজি)</label><input type="number" class="form-input" id="sale-price" placeholder="০" oninput="calcSaleTotal()"></div>
+      <div class="form-row"><label class="form-label">মোট আয় (৳)</label><input type="number" class="form-input" id="sale-total" placeholder="০" style="background:#f0faf4;font-weight:700;"></div>
+    </div>
+    <div class="form-row"><label class="form-label">ক্রেতার নাম</label><input type="text" class="form-input" id="sale-buyer" placeholder="ঐচ্ছিক..."></div>
+    <div class="form-row"><label class="form-label">নোট</label><input type="text" class="form-input" id="sale-notes" placeholder="ঐচ্ছিক..."></div>
+    <button class="btn btn-primary" onclick="saveSale()">✅ সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<script>
+let db = { batches:[], dailyRecords:[], expenses:[], employees:[], advances:[], sales:[] };
+let currentShed = 1;
+let editId = null;
+let _confirmCallback = null;
+
+const EXPENSE_CATS = {
+  chick:{name:'বাচ্চা ক্রয়',icon:'🐣'}, feed:{name:'খাদ্য/ফিড',icon:'🌾'},
+  medicine:{name:'ওষুধ ও ভ্যাকসিন',icon:'💊'}, electricity:{name:'বিদ্যুৎ/জ্বালানি',icon:'💡'},
+  litter:{name:'লিটার/তুষ',icon:'🪵'}, salary:{name:'বেতন/মজুরি',icon:'👷'},
+  transport:{name:'পরিবহন',icon:'🚛'}, other:{name:'অন্যান্য',icon:'📦'}
+};
+
+function loadDB() { try { const d = localStorage.getItem('poultry_db'); if(d) db = JSON.parse(d); } catch(e){} }
+function saveDB() { localStorage.setItem('poultry_db', JSON.stringify(db)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+window.onload = function() {
+  loadDB();
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  document.getElementById('today-date').textContent = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+  ['batch-date','daily-date','expense-date','advance-date','sale-date','emp-join'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = todayStr;
+  });
+  renderDash(); renderBatches(); populateBatchSelects();
+};
+
+function formatTaka(n) { return '৳'+(Math.abs(n||0)).toLocaleString('bn-BD'); }
+function formatDate(s) {
+  if(!s) return '';
+  const d = new Date(s+'T00:00:00');
+  const m = ['জানু','ফেব্রু','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টে','অক্টো','নভে','ডিসে'];
+  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
+}
+function getDayAge(s) {
+  if(!s) return 0;
+  return Math.floor((new Date() - new Date(s+'T00:00:00'))/(1000*60*60*24));
+}
+
+function showConfirm(msg, cb) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-modal').style.display = 'flex';
+  _confirmCallback = cb;
+}
+function _confirmYes() {
+  document.getElementById('confirm-modal').style.display = 'none';
+  if(_confirmCallback) _confirmCallback(); _confirmCallback = null;
+}
+function _confirmNo() { document.getElementById('confirm-modal').style.display = 'none'; _confirmCallback = null; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='dash') renderDash();
+  if(name==='shed') renderBatches();
+  if(name==='daily') { populateBatchSelects(); loadDailyRecords(); }
+  if(name==='expense') { populateBatchSelects(); loadExpenses(); }
+  if(name==='sales') { populateBatchSelects(); loadSales(); }
+  if(name==='report') { populateBatchSelects(); loadReport(); }
+  if(name==='emp') renderEmployees();
+}
+
+// ===== DASHBOARD =====
+function renderDash() {
+  const active = db.batches.filter(b=>b.status==='active');
+  const totalChickens = active.reduce((s,b)=>{
+    const d = db.dailyRecords.filter(r=>r.batchId===b.id).reduce((x,r)=>x+(r.deaths||0),0);
+    return s+(b.initialCount||0)-d;
+  },0);
+  const today = new Date().toISOString().split('T')[0];
+  const todayDeaths = db.dailyRecords.filter(r=>r.date===today).reduce((s,r)=>s+(r.deaths||0),0);
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthExp = db.expenses.filter(e=>e.date&&e.date.slice(0,7)===thisMonth).reduce((s,e)=>s+(e.amount||0),0);
+  const monthSales = db.sales.filter(s=>s.date&&s.date.slice(0,7)===thisMonth).reduce((s,x)=>s+(x.totalAmount||0),0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">🐔 সক্রিয় ব্যাচ</div><div class="stat-value">${active.length}</div></div>
+    <div class="stat-card"><div class="stat-label">🐣 মোট মুরগি</div><div class="stat-value">${totalChickens.toLocaleString('bn-BD')}</div></div>
+    <div class="stat-card"><div class="stat-label">💀 আজকের মৃত্যু</div><div class="stat-value red">${todayDeaths}</div></div>
+    <div class="stat-card"><div class="stat-label">💸 এ মাসে খরচ</div><div class="stat-value" style="font-size:15px;color:var(--danger)">${formatTaka(monthExp)}</div></div>
+    <div class="stat-card full"><div class="stat-label">💰 এ মাসে বিক্রয়</div><div class="stat-value green" style="font-size:18px;">${formatTaka(monthSales)}</div></div>`;
+
+  const el = document.getElementById('dash-batches');
+  if(active.length===0){el.innerHTML='<div class="empty"><div class="icon">🐔</div><p>কোনো সক্রিয় ব্যাচ নেই</p></div>';return;}
+  el.innerHTML = active.map(b=>{
+    const deaths = db.dailyRecords.filter(r=>r.batchId===b.id).reduce((d,r)=>d+(r.deaths||0),0);
+    const current = (b.initialCount||0)-deaths;
+    const age = getDayAge(b.startDate);
+    const feed = db.dailyRecords.filter(r=>r.batchId===b.id).reduce((s,r)=>s+(r.feed||0),0);
+    const dr = b.initialCount>0?((deaths/b.initialCount)*100).toFixed(1):0;
+    return `<div class="list-item">
+      <div class="list-item-header">
+        <div><div class="list-item-title">${b.name}</div>
+        <div class="list-item-sub">শেড ${b.shedId} • বয়স: ${age} দিন • শুরু: ${formatDate(b.startDate)}</div></div>
+        <span class="badge badge-active">সক্রিয়</span>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-box"><div class="mini-label">বর্তমান</div><div class="mini-val">${current}</div></div>
+        <div class="mini-box" style="background:#fde8e8;"><div class="mini-label">মৃত্যু</div><div class="mini-val" style="color:var(--danger);">${deaths}(${dr}%)</div></div>
+        <div class="mini-box" style="background:#fff8e6;"><div class="mini-label">খাবার</div><div class="mini-val" style="color:var(--primary);">${feed}কেজি</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== BATCHES =====
+function selectShed(id, btn) {
+  currentShed = id;
+  document.querySelectorAll('.shed-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderBatches();
+}
+
+function renderBatches() {
+  const batches = db.batches.filter(b=>b.shedId==currentShed);
+  const el = document.getElementById('batch-list');
+  if(batches.length===0){el.innerHTML='<div class="empty"><div class="icon">🐔</div><p>এই শেডে কোনো ব্যাচ নেই</p></div>';return;}
+  el.innerHTML = batches.map(b=>{
+    const deaths = db.dailyRecords.filter(r=>r.batchId===b.id).reduce((d,r)=>d+(r.deaths||0),0);
+    const current = (b.initialCount||0)-deaths;
+    const age = getDayAge(b.startDate);
+    return `<div class="list-item">
+      <div class="list-item-header">
+        <div><div class="list-item-title">${b.name}</div>
+        <div class="list-item-sub">শুরু: ${formatDate(b.startDate)} • বয়স: ${age} দিন</div>
+        <div class="list-item-sub">শুরুতে: ${b.initialCount} • বর্তমান: ${current} • মৃত্যু: ${deaths}</div>
+        ${b.notes?`<div class="list-item-sub">📝 ${b.notes}</div>`:''}</div>
+        <span class="badge ${b.status==='active'?'badge-active':'badge-closed'}">${b.status==='active'?'সক্রিয়':'বন্ধ'}</span>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-sm btn-edit" onclick="editBatch('${b.id}')">✏️ এডিট</button>
+        ${b.status==='active'?`<button class="btn btn-sm" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;" onclick="closeBatch('${b.id}')">🔒 বন্ধ</button>`:''}
+        <button class="btn btn-sm btn-delete" onclick="deleteBatch('${b.id}')">🗑️ মুছুন</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBatchModal(id) {
+  editId = id||null;
+  document.getElementById('batch-modal-title').textContent = id?'✏️ ব্যাচ এডিট':'🐔 নতুন ব্যাচ';
+  if(id){
+    const b = db.batches.find(x=>x.id===id);
+    if(b){ document.getElementById('batch-name').value=b.name||''; document.getElementById('batch-shed').value=b.shedId||'1'; document.getElementById('batch-date').value=b.startDate||''; document.getElementById('batch-count').value=b.initialCount||''; document.getElementById('batch-notes').value=b.notes||''; }
+  } else {
+    document.getElementById('batch-name').value=''; document.getElementById('batch-shed').value=currentShed; document.getElementById('batch-count').value=''; document.getElementById('batch-notes').value='';
+  }
+  document.getElementById('batch-modal').style.display='flex';
+}
+function closeBatchModal(){document.getElementById('batch-modal').style.display='none';editId=null;}
+function editBatch(id){openBatchModal(id);}
+
+function saveBatch() {
+  const name=document.getElementById('batch-name').value.trim();
+  const shedId=document.getElementById('batch-shed').value;
+  const startDate=document.getElementById('batch-date').value;
+  const initialCount=parseInt(document.getElementById('batch-count').value)||0;
+  const notes=document.getElementById('batch-notes').value.trim();
+  if(!name){showToast('ব্যাচের নাম দিন');return;}
+  if(!startDate){showToast('তারিখ দিন');return;}
+  if(initialCount<=0){showToast('বাচ্চার সংখ্যা দিন');return;}
+  if(editId){
+    const i=db.batches.findIndex(b=>b.id===editId);
+    if(i!==-1)db.batches[i]={...db.batches[i],name,shedId,startDate,initialCount,notes};
+    showToast('✅ আপডেট হয়েছে!');
+  } else {
+    db.batches.unshift({id:genId(),name,shedId,startDate,initialCount,notes,status:'active'});
+    showToast('✅ ব্যাচ যোগ হয়েছে!');
+  }
+  saveDB(); closeBatchModal(); renderBatches(); populateBatchSelects();
+}
+
+function closeBatch(id){
+  showConfirm('এই ব্যাচ বন্ধ করতে চান?',()=>{
+    const i=db.batches.findIndex(b=>b.id===id);
+    if(i!==-1)db.batches[i].status='closed';
+    saveDB();renderBatches();showToast('🔒 ব্যাচ বন্ধ হয়েছে');
+  });
+}
+
+function deleteBatch(id){
+  showConfirm('এই ব্যাচ ও সব সংশ্লিষ্ট ডেটা মুছে দিতে চান?',()=>{
+    db.batches=db.batches.filter(b=>b.id!==id);
+    db.dailyRecords=db.dailyRecords.filter(r=>r.batchId!==id);
+    db.expenses=db.expenses.filter(e=>e.batchId!==id);
+    db.sales=db.sales.filter(s=>s.batchId!==id);
+    saveDB();renderBatches();populateBatchSelects();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+function populateBatchSelects(){
+  ['daily-batch-sel','expense-batch-sel','sales-batch-sel','report-batch-sel'].forEach(sid=>{
+    const sel=document.getElementById(sid); if(!sel)return;
+    const prev=sel.value;
+    sel.innerHTML=db.batches.length===0?'<option value="">কোনো ব্যাচ নেই</option>':
+      db.batches.map(b=>`<option value="${b.id}" ${b.id===prev?'selected':''}>[শেড ${b.shedId}] ${b.name}${b.status==='closed'?' (বন্ধ)':''}</option>`).join('');
+  });
+}
+
+// ===== DAILY =====
+function loadDailyRecords(){
+  const batchId=document.getElementById('daily-batch-sel').value;
+  const records=db.dailyRecords.filter(r=>r.batchId===batchId).sort((a,b)=>b.date.localeCompare(a.date));
+  const el=document.getElementById('daily-list');
+  if(!batchId||records.length===0){el.innerHTML='<div class="empty"><div class="icon">📅</div><p>কোনো রেকর্ড নেই</p></div>';return;}
+  el.innerHTML=records.map(r=>`
+    <div class="list-item">
+      <div class="list-item-header"><div>
+        <div class="list-item-title">📅 ${formatDate(r.date)}</div>
+        <div class="list-item-sub">🌾 খাবার: ${r.feed||0} কেজি &nbsp;|&nbsp; 💀 মৃত্যু: ${r.deaths||0}টি</div>
+        ${r.medicine?`<div class="list-item-sub">💊 ${r.medicine}</div>`:''}
+        ${r.notes?`<div class="list-item-sub">📝 ${r.notes}</div>`:''}
+      </div></div>
+      <div class="item-actions">
+        <button class="btn btn-sm btn-edit" onclick="editDaily('${r.id}')">✏️ এডিট</button>
+        <button class="btn btn-sm btn-delete" onclick="deleteDaily('${r.id}')">🗑️ মুছুন</button>
+      </div>
+    </div>`).join('');
+}
+
+function openDailyModal(id){
+  const batchId=document.getElementById('daily-batch-sel').value;
+  if(!batchId){showToast('আগে ব্যাচ নির্বাচন করুন');return;}
+  editId=id||null;
+  document.getElementById('daily-modal-title').textContent=id?'✏️ রেকর্ড এডিট':'📅 দৈনিক রেকর্ড';
+  if(id){
+    const r=db.dailyRecords.find(x=>x.id===id);
+    if(r){document.getElementById('daily-date').value=r.date||'';document.getElementById('daily-feed').value=r.feed||'';document.getElementById('daily-deaths').value=r.deaths||'';document.getElementById('daily-medicine').value=r.medicine||'';document.getElementById('daily-notes').value=r.notes||'';}
+  } else {
+    document.getElementById('daily-feed').value='';document.getElementById('daily-deaths').value='';document.getElementById('daily-medicine').value='';document.getElementById('daily-notes').value='';
+  }
+  document.getElementById('daily-modal').style.display='flex';
+}
+function closeDailyModal(){document.getElementById('daily-modal').style.display='none';editId=null;}
+function editDaily(id){openDailyModal(id);}
+
+function saveDaily(){
+  const batchId=document.getElementById('daily-batch-sel').value;
+  const date=document.getElementById('daily-date').value;
+  const feed=parseFloat(document.getElementById('daily-feed').value)||0;
+  const deaths=parseInt(document.getElementById('daily-deaths').value)||0;
+  const medicine=document.getElementById('daily-medicine').value.trim();
+  const notes=document.getElementById('daily-notes').value.trim();
+  if(!date){showToast('তারিখ দিন');return;}
+  if(editId){
+    const i=db.dailyRecords.findIndex(r=>r.id===editId);
+    if(i!==-1)db.dailyRecords[i]={...db.dailyRecords[i],date,feed,deaths,medicine,notes};
+    showToast('✅ আপডেট হয়েছে!');
+  } else {
+    db.dailyRecords.push({id:genId(),batchId,date,feed,deaths,medicine,notes});
+    showToast('✅ রেকর্ড যোগ হয়েছে!');
+  }
+  saveDB();closeDailyModal();loadDailyRecords();renderDash();
+}
+
+function deleteDaily(id){
+  showConfirm('এই রেকর্ড মুছে দিতে চান?',()=>{
+    db.dailyRecords=db.dailyRecords.filter(r=>r.id!==id);
+    saveDB();loadDailyRecords();renderDash();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+// ===== EXPENSES =====
+function loadExpenses(){
+  const batchId=document.getElementById('expense-batch-sel').value;
+  const expenses=db.expenses.filter(e=>e.batchId===batchId).sort((a,b)=>b.date.localeCompare(a.date));
+  const total=expenses.reduce((s,e)=>s+(e.amount||0),0);
+  const el=document.getElementById('expense-list');
+  if(!batchId||expenses.length===0){el.innerHTML='<div class="empty"><div class="icon">💸</div><p>কোনো খরচ নেই</p></div>';document.getElementById('expense-total').innerHTML='';return;}
+  el.innerHTML=expenses.map(e=>{
+    const cat=EXPENSE_CATS[e.category]||{name:e.category,icon:'📦'};
+    return `<div class="list-item">
+      <div class="list-item-header">
+        <div><div class="list-item-title">${cat.icon} ${cat.name}</div>
+        <div class="list-item-sub">📅 ${formatDate(e.date)}${e.qty?' • '+e.qty:''}</div>
+        ${e.description?`<div class="list-item-sub">📝 ${e.description}</div>`:''}
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--danger);">${formatTaka(e.amount)}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-sm btn-edit" onclick="editExpense('${e.id}')">✏️ এডিট</button>
+        <button class="btn btn-sm btn-delete" onclick="deleteExpense('${e.id}')">🗑️ মুছুন</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('expense-total').innerHTML=`<div class="card" style="background:#fde8e8;border-color:#f5b8b8;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:14px;font-weight:600;">মোট খরচ</span>
+      <span style="font-size:20px;font-weight:700;color:var(--danger);">${formatTaka(total)}</span>
+    </div></div>`;
+}
+
+function openExpenseModal(id){
+  const batchId=document.getElementById('expense-batch-sel').value;
+  if(!batchId){showToast('আগে ব্যাচ নির্বাচন করুন');return;}
+  editId=id||null;
+  document.getElementById('expense-modal-title').textContent=id?'✏️ খরচ এডিট':'💸 নতুন খরচ';
+  if(id){
+    const e=db.expenses.find(x=>x.id===id);
+    if(e){document.getElementById('expense-date').value=e.date||'';document.getElementById('expense-cat').value=e.category||'other';document.getElementById('expense-amount').value=e.amount||'';document.getElementById('expense-qty').value=e.qty||'';document.getElementById('expense-desc').value=e.description||'';}
+  } else {
+    document.getElementById('expense-amount').value='';document.getElementById('expense-qty').value='';document.getElementById('expense-desc').value='';
+  }
+  document.getElementById('expense-modal').style.display='flex';
+}
+function closeExpenseModal(){document.getElementById('expense-modal').style.display='none';editId=null;}
+function editExpense(id){openExpenseModal(id);}
+
+function saveExpense(){
+  const batchId=document.getElementById('expense-batch-sel').value;
+  const date=document.getElementById('expense-date').value;
+  const category=document.getElementById('expense-cat').value;
+  const amount=parseFloat(document.getElementById('expense-amount').value)||0;
+  const qty=document.getElementById('expense-qty').value.trim();
+  const description=document.getElementById('expense-desc').value.trim();
+  if(!date){showToast('তারিখ দিন');return;}
+  if(amount<=0){showToast('পরিমাণ দিন');return;}
+  if(editId){
+    const i=db.expenses.findIndex(e=>e.id===editId);
+    if(i!==-1)db.expenses[i]={...db.expenses[i],date,category,amount,qty,description};
+    showToast('✅ আপডেট হয়েছে!');
+  } else {
+    db.expenses.push({id:genId(),batchId,date,category,amount,qty,description});
+    showToast('✅ খরচ যোগ হয়েছে!');
+  }
+  saveDB();closeExpenseModal();loadExpenses();
+}
+
+function deleteExpense(id){
+  showConfirm('এই খরচ মুছে দিতে চান?',()=>{
+    db.expenses=db.expenses.filter(e=>e.id!==id);
+    saveDB();loadExpenses();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+// ===== EMPLOYEES =====
+function renderEmployees(){
+  const el=document.getElementById('emp-list');
+  if(db.employees.length===0){el.innerHTML='<div class="empty"><div class="icon">👷</div><p>কোনো কর্মচারী নেই</p></div>';return;}
+  const thisMonth=new Date().toISOString().slice(0,7);
+  el.innerHTML=db.employees.map(emp=>{
+    const advances=db.advances.filter(a=>a.employeeId===emp.id&&a.date&&a.date.slice(0,7)===thisMonth);
+    const totalAdv=advances.reduce((s,a)=>s+(a.amount||0),0);
+    const due=(emp.salary||0)-totalAdv;
+    return `<div class="list-item">
+      <div class="list-item-header"><div>
+        <div class="list-item-title">👷 ${emp.name}</div>
+        <div class="list-item-sub">বেতন: ${formatTaka(emp.salary)} | মোবাইল: ${emp.phone||'—'}</div>
+        <div class="list-item-sub">যোগদান: ${formatDate(emp.joinDate)}</div>
+      </div></div>
+      <div class="mini-grid">
+        <div class="mini-box"><div class="mini-label">বেতন</div><div class="mini-val" style="color:#1a6b3c;">${formatTaka(emp.salary)}</div></div>
+        <div class="mini-box" style="background:#fff8e6;"><div class="mini-label">অগ্রীম</div><div class="mini-val" style="color:var(--primary);">${formatTaka(totalAdv)}</div></div>
+        <div class="mini-box" style="background:${due>=0?'#e6f7ee':'#fde8e8'};"><div class="mini-label">প্রাপ্য</div><div class="mini-val" style="color:${due>=0?'#1a6b3c':'var(--danger)'};">${formatTaka(due)}</div></div>
+      </div>
+      ${advances.length>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">এ মাসের অগ্রীম:</div>
+        ${advances.map(a=>`<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;align-items:center;">
+          <span>${formatDate(a.date)}${a.notes?' - '+a.notes:''}</span>
+          <span>${formatTaka(a.amount)} <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;" onclick="deleteAdvance('${a.id}')">✕</button></span>
+        </div>`).join('')}
+      </div>`:''}
+      <div class="item-actions">
+        <button class="btn btn-sm btn-edit" onclick="editEmployee('${emp.id}')">✏️ এডিট</button>
+        <button class="btn btn-sm" style="background:#e8f4ea;color:#1a6b3c;border:1px solid #b8dfc0;" onclick="openAdvanceModal('${emp.id}','${emp.name}')">💰 অগ্রীম</button>
+        <button class="btn btn-sm btn-delete" onclick="deleteEmployee('${emp.id}')">🗑️ মুছুন</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openEmpModal(id){
+  editId=id||null;
+  document.getElementById('emp-modal-title').textContent=id?'✏️ কর্মচারী এডিট':'👷 নতুন কর্মচারী';
+  if(id){
+    const emp=db.employees.find(e=>e.id===id);
+    if(emp){document.getElementById('emp-name').value=emp.name||'';document.getElementById('emp-salary').value=emp.salary||'';document.getElementById('emp-phone').value=emp.phone||'';document.getElementById('emp-join').value=emp.joinDate||'';}
+  } else {
+    document.getElementById('emp-name').value='';document.getElementById('emp-salary').value='';document.getElementById('emp-phone').value='';
+  }
+  document.getElementById('emp-modal').style.display='flex';
+}
+function closeEmpModal(){document.getElementById('emp-modal').style.display='none';editId=null;}
+function editEmployee(id){openEmpModal(id);}
+
+function saveEmployee(){
+  const name=document.getElementById('emp-name').value.trim();
+  const salary=parseFloat(document.getElementById('emp-salary').value)||0;
+  const phone=document.getElementById('emp-phone').value.trim();
+  const joinDate=document.getElementById('emp-join').value;
+  if(!name){showToast('নাম দিন');return;}
+  if(editId){
+    const i=db.employees.findIndex(e=>e.id===editId);
+    if(i!==-1)db.employees[i]={...db.employees[i],name,salary,phone,joinDate};
+    showToast('✅ আপডেট হয়েছে!');
+  } else {
+    db.employees.push({id:genId(),name,salary,phone,joinDate});
+    showToast('✅ কর্মচারী যোগ হয়েছে!');
+  }
+  saveDB();closeEmpModal();renderEmployees();
+}
+
+function deleteEmployee(id){
+  showConfirm('এই কর্মচারী মুছে দিতে চান?',()=>{
+    db.employees=db.employees.filter(e=>e.id!==id);
+    db.advances=db.advances.filter(a=>a.employeeId!==id);
+    saveDB();renderEmployees();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+function openAdvanceModal(empId,empName){
+  document.getElementById('advance-emp-id').value=empId;
+  document.getElementById('advance-modal-title').textContent=`💰 ${empName} — অগ্রীম`;
+  document.getElementById('advance-amount').value='';document.getElementById('advance-notes').value='';
+  document.getElementById('advance-modal').style.display='flex';
+}
+function closeAdvanceModal(){document.getElementById('advance-modal').style.display='none';}
+
+function saveAdvance(){
+  const employeeId=document.getElementById('advance-emp-id').value;
+  const date=document.getElementById('advance-date').value;
+  const amount=parseFloat(document.getElementById('advance-amount').value)||0;
+  const notes=document.getElementById('advance-notes').value.trim();
+  if(!date){showToast('তারিখ দিন');return;}
+  if(amount<=0){showToast('পরিমাণ দিন');return;}
+  db.advances.push({id:genId(),employeeId,date,amount,notes});
+  saveDB();closeAdvanceModal();renderEmployees();showToast('✅ অগ্রীম যোগ হয়েছে!');
+}
+
+function deleteAdvance(id){
+  showConfirm('এই অগ্রীম মুছে দিতে চান?',()=>{
+    db.advances=db.advances.filter(a=>a.id!==id);
+    saveDB();renderEmployees();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+// ===== SALES =====
+function calcSaleTotal(){
+  const w=parseFloat(document.getElementById('sale-weight').value)||0;
+  const p=parseFloat(document.getElementById('sale-price').value)||0;
+  if(w&&p)document.getElementById('sale-total').value=Math.round(w*p);
+}
+
+function loadSales(){
+  const batchId=document.getElementById('sales-batch-sel').value;
+  const sales=db.sales.filter(s=>s.batchId===batchId).sort((a,b)=>b.date.localeCompare(a.date));
+  const el=document.getElementById('sales-list');
+  if(!batchId||sales.length===0){el.innerHTML='<div class="empty"><div class="icon">🛒</div><p>কোনো বিক্রয় নেই</p></div>';return;}
+  const ti=sales.reduce((s,x)=>s+(x.totalAmount||0),0);
+  const tw=sales.reduce((s,x)=>s+(x.totalWeight||0),0);
+  const tc=sales.reduce((s,x)=>s+(x.count||0),0);
+  el.innerHTML=`<div class="card" style="background:#e6f7ee;border-color:#b8dfc0;">
+    <div class="mini-grid">
+      <div class="mini-box"><div class="mini-label">বিক্রি</div><div class="mini-val">${tc}টি</div></div>
+      <div class="mini-box"><div class="mini-label">ওজন</div><div class="mini-val">${tw}কেজি</div></div>
+      <div class="mini-box" style="background:#d4f0e0;"><div class="mini-label">মোট আয়</div><div class="mini-val" style="color:#1a6b3c;">${formatTaka(ti)}</div></div>
+    </div></div>`+
+  sales.map(s=>`<div class="list-item">
+    <div class="list-item-header">
+      <div><div class="list-item-title">🛒 ${formatDate(s.date)}</div>
+      <div class="list-item-sub">${s.count}টি • ${s.totalWeight}কেজি • ৳${s.pricePerKg}/কেজি</div>
+      ${s.buyerName?`<div class="list-item-sub">👤 ${s.buyerName}</div>`:''}
+      ${s.notes?`<div class="list-item-sub">📝 ${s.notes}</div>`:''}
+      </div>
+      <div style="font-size:16px;font-weight:700;color:#1a6b3c;">${formatTaka(s.totalAmount)}</div>
+    </div>
+    <div class="item-actions">
+      <button class="btn btn-sm btn-edit" onclick="editSale('${s.id}')">✏️ এডিট</button>
+      <button class="btn btn-sm btn-delete" onclick="deleteSale('${s.id}')">🗑️ মুছুন</button>
+    </div>
+  </div>`).join('');
+}
+
+function openSaleModal(id){
+  const batchId=document.getElementById('sales-batch-sel').value;
+  if(!batchId){showToast('আগে ব্যাচ নির্বাচন করুন');return;}
+  editId=id||null;
+  document.getElementById('sale-modal-title').textContent=id?'✏️ বিক্রয় এডিট':'🛒 নতুন বিক্রয়';
+  if(id){
+    const s=db.sales.find(x=>x.id===id);
+    if(s){document.getElementById('sale-date').value=s.date||'';document.getElementById('sale-count').value=s.count||'';document.getElementById('sale-weight').value=s.totalWeight||'';document.getElementById('sale-price').value=s.pricePerKg||'';document.getElementById('sale-total').value=s.totalAmount||'';document.getElementById('sale-buyer').value=s.buyerName||'';document.getElementById('sale-notes').value=s.notes||'';}
+  } else {
+    ['sale-count','sale-weight','sale-price','sale-total','sale-buyer','sale-notes'].forEach(i=>document.getElementById(i).value='');
+  }
+  document.getElementById('sale-modal').style.display='flex';
+}
+function closeSaleModal(){document.getElementById('sale-modal').style.display='none';editId=null;}
+function editSale(id){openSaleModal(id);}
+
+function saveSale(){
+  const batchId=document.getElementById('sales-batch-sel').value;
+  const date=document.getElementById('sale-date').value;
+  const count=parseInt(document.getElementById('sale-count').value)||0;
+  const totalWeight=parseFloat(document.getElementById('sale-weight').value)||0;
+  const pricePerKg=parseFloat(document.getElementById('sale-price').value)||0;
+  const totalAmount=parseFloat(document.getElementById('sale-total').value)||(totalWeight*pricePerKg);
+  const buyerName=document.getElementById('sale-buyer').value.trim();
+  const notes=document.getElementById('sale-notes').value.trim();
+  if(!date){showToast('তারিখ দিন');return;}
+  if(totalAmount<=0){showToast('বিক্রয়ের তথ্য দিন');return;}
+  if(editId){
+    const i=db.sales.findIndex(s=>s.id===editId);
+    if(i!==-1)db.sales[i]={...db.sales[i],date,count,totalWeight,pricePerKg,totalAmount,buyerName,notes};
+    showToast('✅ আপডেট হয়েছে!');
+  } else {
+    db.sales.push({id:genId(),batchId,date,count,totalWeight,pricePerKg,totalAmount,buyerName,notes});
+    showToast('✅ বিক্রয় যোগ হয়েছে!');
+  }
+  saveDB();closeSaleModal();loadSales();
+}
+
+function deleteSale(id){
+  showConfirm('এই বিক্রয় মুছে দিতে চান?',()=>{
+    db.sales=db.sales.filter(s=>s.id!==id);
+    saveDB();loadSales();showToast('🗑️ মুছে দেওয়া হয়েছে');
+  });
+}
+
+// ===== REPORT =====
+function loadReport(){
+  const batchId=document.getElementById('report-batch-sel').value;
+  const el=document.getElementById('report-content');
+  if(!batchId){el.innerHTML='<div class="empty"><div class="icon">📊</div><p>ব্যাচ নির্বাচন করুন</p></div>';return;}
+  const batch=db.batches.find(b=>b.id===batchId);
+  if(!batch)return;
+  const records=db.dailyRecords.filter(r=>r.batchId===batchId);
+  const expenses=db.expenses.filter(e=>e.batchId===batchId);
+  const sales=db.sales.filter(s=>s.batchId===batchId);
+  const deaths=records.reduce((s,r)=>s+(r.deaths||0),0);
+  const current=(batch.initialCount||0)-deaths;
+  const feed=records.reduce((s,r)=>s+(r.feed||0),0);
+  const totalExp=expenses.reduce((s,e)=>s+(e.amount||0),0);
+  const totalInc=sales.reduce((s,x)=>s+(x.totalAmount||0),0);
+  const totalWt=sales.reduce((s,x)=>s+(x.totalWeight||0),0);
+  const profit=totalInc-totalExp;
+  const age=getDayAge(batch.startDate);
+  const dr=batch.initialCount>0?((deaths/batch.initialCount)*100).toFixed(2):0;
+  const fcr=totalWt>0?(feed/totalWt).toFixed(2):'N/A';
+  const cpk=totalWt>0?Math.round(totalExp/totalWt):0;
+  const breakEven=totalWt>0?Math.round(totalExp/totalWt):0;
+  const avgSalePrice=totalWt>0?Math.round(totalInc/totalWt):0;
+  const aboveBreakEven=avgSalePrice>=breakEven;
+  const catMap={};
+  expenses.forEach(e=>{
+    const cat=EXPENSE_CATS[e.category]||{name:e.category,icon:'📦'};
+    if(!catMap[e.category])catMap[e.category]={name:cat.name,icon:cat.icon,total:0};
+    catMap[e.category].total+=e.amount||0;
+  });
+  const catList=Object.values(catMap).sort((a,b)=>b.total-a.total);
+
+  el.innerHTML=`
+    <div class="card" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));color:white;border:none;margin-bottom:10px;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:3px;">📊 ${batch.name}</div>
+      <div style="font-size:11px;opacity:0.85;">শেড ${batch.shedId} • শুরু: ${formatDate(batch.startDate)} • বয়স: ${age} দিন</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">🐣 শুরুতে</div><div class="stat-value">${batch.initialCount}</div></div>
+      <div class="stat-card"><div class="stat-label">🐔 বর্তমান</div><div class="stat-value">${current}</div></div>
+      <div class="stat-card"><div class="stat-label">💀 মৃত্যু</div><div class="stat-value red">${deaths}(${dr}%)</div></div>
+      <div class="stat-card"><div class="stat-label">🌾 মোট খাবার</div><div class="stat-value" style="font-size:15px;">${feed}কেজি</div></div>
+      <div class="stat-card"><div class="stat-label">📈 FCR</div><div class="stat-value" style="font-size:18px;">${fcr}</div></div>
+      <div class="stat-card"><div class="stat-label">⚖️ বিক্রয় ওজন</div><div class="stat-value" style="font-size:15px;">${totalWt}কেজি</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">💰 আর্থিক সারসংক্ষেপ</div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">মোট খরচ</span><span style="font-weight:700;color:var(--danger);">${formatTaka(totalExp)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">মোট আয়</span><span style="font-weight:700;color:#1a6b3c;">${formatTaka(totalInc)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">প্রতি কেজি উৎপাদন খরচ</span><span style="font-weight:700;">${formatTaka(cpk)}</span></div>
+      ${totalWt>0?`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">গড় বিক্রয় মূল্য</span><span style="font-weight:700;color:#1a6b3c;">${formatTaka(avgSalePrice)}/কেজি</span></div>
+      <div style="padding:10px;border-radius:10px;margin:8px 0;background:${aboveBreakEven?'#e6f7ee':'#fde8e8'};border:1px solid ${aboveBreakEven?'#b8dfc0':'#f5b8b8'};">
+        <div style="font-size:13px;font-weight:700;color:${aboveBreakEven?'#1a6b3c':'var(--danger)'};">
+          ⚖️ Break-even মূল্য: ${formatTaka(breakEven)}/কেজি
+        </div>
+        <div style="font-size:11px;margin-top:4px;color:${aboveBreakEven?'#1a6b3c':'var(--danger)'};">
+          ${aboveBreakEven?`✅ লাভজনক! বর্তমান দাম Break-even এর চেয়ে ${formatTaka(avgSalePrice-breakEven)}/কেজি বেশি`:`⚠️ সাবধান! Break-even এর চেয়ে ${formatTaka(breakEven-avgSalePrice)}/কেজি কম দামে বিক্রি হচ্ছে`}
+        </div>
+      </div>`:''}
+      <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:15px;font-weight:700;">নিট ${profit>=0?'লাভ':'ক্ষতি'}</span><span style="font-size:20px;font-weight:700;color:${profit>=0?'#1a6b3c':'var(--danger)'};">${profit>=0?'+':''}${formatTaka(profit)}</span></div>
+    </div>
+    ${catList.length>0?`<div class="card"><div class="section-title">🗂️ খাত অনুযায়ী খরচ</div>
+    ${catList.map(c=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span>${c.icon} ${c.name}</span><span style="font-weight:700;color:var(--danger);">${formatTaka(c.total)}</span></div>`).join('')}
+    </div>`:''}`;
+}
+
+// ===== DATA =====
+function backupData(){
+  const data=JSON.stringify(db);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(data).then(()=>showToast('✅ ব্যাকআপ কপি হয়েছে!')).catch(()=>fallbackCopy(data));
+  } else { fallbackCopy(data); }
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;opacity:0;';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');showToast('✅ ব্যাকআপ কপি হয়েছে!');}catch(e){showToast('❌ কপি হয়নি');}
+  document.body.removeChild(ta);
+}
+function showRestoreArea(){const a=document.getElementById('restore-area');a.style.display=a.style.display==='none'?'block':'none';}
+function restoreData(){
+  try{
+    const d=JSON.parse(document.getElementById('restore-input').value.trim());
+    if(!d.batches){showToast('❌ ভুল ডেটা');return;}
+    showConfirm('বিদ্যমান সব ডেটা মুছে রিস্টোর করবেন?',()=>{
+      db=d;saveDB();showToast('✅ রিস্টোর সম্পন্ন!');renderDash();renderBatches();populateBatchSelects();
+    });
+  }catch(e){showToast('❌ ভুল ফরম্যাট');}
+}
+function clearAllData(){
+  showConfirm('সব ডেটা মুছে দিতে চান? এটি পূর্বাবস্থায় ফেরানো যাবে না!',()=>{
+    db={batches:[],dailyRecords:[],expenses:[],employees:[],advances:[],sales:[]};
+    saveDB();renderDash();renderBatches();showToast('🗑️ সব ডেটা মুছে গেছে');
+  });
+}
+</script>
+</body>
+</html>
