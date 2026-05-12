@@ -173,7 +173,8 @@ body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); color:var(-
   </div>
   <div class="card">
     <div class="section-title">💾 ডেটা ব্যাকআপ</div>
-    <button class="btn btn-primary" onclick="backupData()" style="margin-bottom:8px;">📤 ব্যাকআপ কপি করুন</button>
+    <button class="btn btn-primary" onclick="showBackupData()" style="margin-bottom:8px;">📤 ব্যাকআপ দেখুন ও কপি করুন</button>
+    <button class="btn btn-outline" onclick="shareBackup()" style="margin-bottom:8px;">📨 শেয়ার করুন</button>
     <button class="btn btn-outline" onclick="showRestoreArea()">📥 রিস্টোর করুন</button>
     <div id="restore-area" style="display:none;margin-top:10px;">
       <textarea class="form-input" id="restore-input" rows="4" placeholder="ব্যাকআপ কোড এখানে পেস্ট করুন..."></textarea>
@@ -183,6 +184,23 @@ body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); color:var(-
   <div class="card">
     <div class="section-title">⚠️ ডেটা মুছুন</div>
     <button class="btn" style="background:#fde8e8;color:var(--danger);border:1px solid #f5b8b8;width:100%;" onclick="clearAllData()">🗑️ সব ডেটা মুছুন</button>
+  </div>
+</div>
+
+<!-- Backup Modal -->
+<div class="modal-overlay" id="backup-modal" style="display:none;" onclick="if(event.target===this)closeBackupModal()">
+  <div class="modal">
+    <div class="modal-title">
+      <span>💾 ব্যাকআপ কোড</span>
+      <button class="modal-close" onclick="closeBackupModal()">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">নিচের কোডটি সম্পূর্ণ সিলেক্ট করে কপি করুন এবং নোটপ্যাড বা মেসেজে সেভ করুন।</div>
+    <textarea id="backup-textarea" class="form-input" rows="6" readonly onclick="this.select()" style="font-size:11px;font-family:monospace;background:#f8f8f8;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-primary" onclick="copyBackupText()" style="flex:1;">📋 কপি করুন</button>
+      <button class="btn btn-outline" onclick="selectAllBackup()" style="flex:1;">🔲 সব সিলেক্ট</button>
+    </div>
+    <div id="backup-copy-msg" style="text-align:center;font-size:12px;color:#1a6b3c;margin-top:8px;display:none;">✅ কপি হয়েছে!</div>
   </div>
 </div>
 
